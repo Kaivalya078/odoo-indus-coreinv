@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, categories, products, suppliers, warehouses, locations
+from app.routers import auth, categories, products, suppliers, warehouses, locations, receipts, deliveries, transfers, adjustments
 
 app = FastAPI(
     title="CoreINV — Inventory Management System",
@@ -22,6 +22,10 @@ app.include_router(products.router)
 app.include_router(suppliers.router)
 app.include_router(warehouses.router)
 app.include_router(locations.router)
+app.include_router(receipts.router)
+app.include_router(deliveries.router)
+app.include_router(transfers.router)
+app.include_router(adjustments.router)
 
 
 @app.get("/health")
