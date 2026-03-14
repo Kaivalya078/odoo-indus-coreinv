@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Plus } from 'lucide-react'
 import api from '../api'
 
 export default function Adjustments() {
@@ -18,8 +19,10 @@ export default function Adjustments() {
 
   const submit = async (e) => {
     e.preventDefault()
-    await api.post('/adjustments', { ...form, quantity: Number(form.quantity) })
-    setShow(false); setForm({ product_id: '', location_id: '', quantity: '', reason: '' }); load()
+    try {
+      await api.post('/adjustments', { ...form, quantity: Number(form.quantity) })
+      setShow(false); setForm({ product_id: '', location_id: '', quantity: '', reason: '' }); load()
+    } catch (err) { setError(err.response?.data?.detail || 'Error') }
   }
 
   const action = async (id, act) => {
@@ -31,7 +34,7 @@ export default function Adjustments() {
     <div>
       <div className="page-header">
         <h1>Adjustments</h1>
-        <button className="btn btn-primary" onClick={() => setShow(true)}>+ New Adjustment</button>
+        <button className="btn btn-primary" onClick={() => setShow(true)}><Plus size={16} /> New Adjustment</button>
       </div>
       {error && <p className="error">{error}</p>}
       <table>
@@ -39,8 +42,8 @@ export default function Adjustments() {
         <tbody>
           {items.map(a => (
             <tr key={a.id}>
-              <td>{a.reference}</td><td>{a.product_name}</td><td>{a.location_name}</td>
-              <td style={{ color: a.quantity > 0 ? '#22c55e' : '#ef4444' }}>{Number(a.quantity) > 0 ? '+' : ''}{a.quantity}</td>
+              <td className="font-bold">{a.reference}</td><td>{a.product_name}</td><td>{a.location_name}</td>
+              <td style={{ color: Number(a.quantity) > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>{Number(a.quantity) > 0 ? '+' : ''}{a.quantity}</td>
               <td>{a.reason}</td>
               <td><span className={`badge badge-${a.status}`}>{a.status}</span></td>
               <td className="actions">
@@ -49,7 +52,7 @@ export default function Adjustments() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && <tr><td colSpan={7}>No adjustments</td></tr>}
+          {items.length === 0 && <tr><td colSpan={7} className="text-muted" style={{ textAlign: 'center', padding: 32 }}>No adjustments</td></tr>}
         </tbody>
       </table>
       {show && (
@@ -57,21 +60,26 @@ export default function Adjustments() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>New Adjustment</h3>
             <form onSubmit={submit}>
-              <div className="form-group"><label>Product</label>
-                <select required value={form.product_id} onChange={e => setForm({...form, product_id: e.target.value})}>
-                  <option value="">Select...</option>
-                  {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-group"><label>Product</label>
+                  <select required value={form.product_id} onChange={e => setForm({...form, product_id: e.target.value})}>
+                    <option value="">Select...</option>
+                    {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group"><label>Location</label>
+                  <select required value={form.location_id} onChange={e => setForm({...form, location_id: e.target.value})}>
+                    <option value="">Select...</option>
+                    {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                  </select>
+                </div>
               </div>
-              <div className="form-group"><label>Location</label>
-                <select required value={form.location_id} onChange={e => setForm({...form, location_id: e.target.value})}>
-                  <option value="">Select...</option>
-                  {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                </select>
+              <div className="form-group"><label>Quantity (negative to reduce)</label><input required type="number" placeholder="-5 or 10" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} /></div>
+              <div className="form-group"><label>Reason</label><textarea required placeholder="Reason for adjustment..." value={form.reason} onChange={e => setForm({...form, reason: e.target.value})} /></div>
+              <div className="actions" style={{ marginTop: 8 }}>
+                <button className="btn btn-primary" type="submit">Create Adjustment</button>
+                <button className="btn btn-ghost" type="button" onClick={() => setShow(false)}>Cancel</button>
               </div>
-              <div className="form-group"><label>Quantity (negative to reduce)</label><input required type="number" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} /></div>
-              <div className="form-group"><label>Reason</label><textarea required value={form.reason} onChange={e => setForm({...form, reason: e.target.value})} /></div>
-              <div className="actions"><button className="btn btn-primary" type="submit">Create</button><button className="btn" type="button" onClick={() => setShow(false)}>Cancel</button></div>
             </form>
           </div>
         </div>

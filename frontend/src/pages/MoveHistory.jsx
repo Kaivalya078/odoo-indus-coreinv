@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import api from '../api'
 
 export default function MoveHistory() {
@@ -14,12 +15,18 @@ export default function MoveHistory() {
         <tbody>
           {moves.map(m => (
             <tr key={m.id}>
-              <td>{m.reference}</td><td>{m.product_name}</td><td>{m.location_name}</td>
-              <td style={{ color: Number(m.quantity) > 0 ? '#22c55e' : '#ef4444', fontWeight: 600 }}>{Number(m.quantity) > 0 ? '+' : ''}{m.quantity}</td>
-              <td>{m.move_type}</td><td>{new Date(m.created_at).toLocaleString()}</td>
+              <td className="font-bold">{m.reference}</td><td>{m.product_name}</td><td>{m.location_name}</td>
+              <td>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: Number(m.quantity) > 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>
+                  {Number(m.quantity) > 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                  {Number(m.quantity) > 0 ? '+' : ''}{m.quantity}
+                </span>
+              </td>
+              <td><span className="badge" style={{ background: 'var(--bg)', color: 'var(--text-secondary)' }}>{m.move_type}</span></td>
+              <td>{new Date(m.created_at).toLocaleString()}</td>
             </tr>
           ))}
-          {moves.length === 0 && <tr><td colSpan={6}>No movements yet</td></tr>}
+          {moves.length === 0 && <tr><td colSpan={6} className="text-muted" style={{ textAlign: 'center', padding: 32 }}>No movements yet</td></tr>}
         </tbody>
       </table>
     </div>

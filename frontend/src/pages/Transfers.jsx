@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Plus } from 'lucide-react'
 import api from '../api'
 
 export default function Transfers() {
@@ -20,16 +21,19 @@ export default function Transfers() {
 
   const addLine = () => setForm({ ...form, items: [...form.items, { product_id: '', source_location_id: '', dest_location_id: '', quantity: '' }] })
   const updateLine = (i, field, val) => { const items = [...form.items]; items[i][field] = val; setForm({ ...form, items }) }
+  const removeLine = (i) => { if (form.items.length > 1) { const items = [...form.items]; items.splice(i, 1); setForm({ ...form, items }) } }
 
   const submit = async (e) => {
     e.preventDefault()
-    await api.post('/transfers', {
-      source_warehouse_id: form.source_warehouse_id,
-      dest_warehouse_id: form.dest_warehouse_id,
-      notes: form.notes || null,
-      items: form.items.map(i => ({ product_id: i.product_id, source_location_id: i.source_location_id, dest_location_id: i.dest_location_id, quantity: Number(i.quantity) })),
-    })
-    setShow(false); setForm({ source_warehouse_id: '', dest_warehouse_id: '', notes: '', items: [{ product_id: '', source_location_id: '', dest_location_id: '', quantity: '' }] }); load()
+    try {
+      await api.post('/transfers', {
+        source_warehouse_id: form.source_warehouse_id,
+        dest_warehouse_id: form.dest_warehouse_id,
+        notes: form.notes || null,
+        items: form.items.map(i => ({ product_id: i.product_id, source_location_id: i.source_location_id, dest_location_id: i.dest_location_id, quantity: Number(i.quantity) })),
+      })
+      setShow(false); setForm({ source_warehouse_id: '', dest_warehouse_id: '', notes: '', items: [{ product_id: '', source_location_id: '', dest_location_id: '', quantity: '' }] }); load()
+    } catch (err) { setError(err.response?.data?.detail || 'Error') }
   }
 
   const action = async (id, act) => {
@@ -41,7 +45,7 @@ export default function Transfers() {
     <div>
       <div className="page-header">
         <h1>Transfers</h1>
-        <button className="btn btn-primary" onClick={() => setShow(true)}>+ New Transfer</button>
+        <button className="btn btn-primary" onClick={() => setShow(true)}><Plus size={16} /> New Transfer</button>
       </div>
       {error && <p className="error">{error}</p>}
       <table>
@@ -49,7 +53,7 @@ export default function Transfers() {
         <tbody>
           {items.map(t => (
             <tr key={t.id}>
-              <td>{t.reference}</td><td>{t.source_warehouse_name}</td><td>{t.dest_warehouse_name}</td>
+              <td className="font-bold">{t.reference}</td><td>{t.source_warehouse_name}</td><td>{t.dest_warehouse_name}</td>
               <td><span className={`badge badge-${t.status}`}>{t.status}</span></td>
               <td>{t.items.length}</td><td>{new Date(t.created_at).toLocaleDateString()}</td>
               <td className="actions">
@@ -59,7 +63,7 @@ export default function Transfers() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && <tr><td colSpan={7}>No transfers</td></tr>}
+          {items.length === 0 && <tr><td colSpan={7} className="text-muted" style={{ textAlign: 'center', padding: 32 }}>No transfers</td></tr>}
         </tbody>
       </table>
       {show && (
@@ -67,39 +71,45 @@ export default function Transfers() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>New Transfer</h3>
             <form onSubmit={submit}>
-              <div className="form-group"><label>Source Warehouse</label>
-                <select required value={form.source_warehouse_id} onChange={e => setForm({...form, source_warehouse_id: e.target.value})}>
-                  <option value="">Select...</option>
-                  {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-group"><label>Source Warehouse</label>
+                  <select required value={form.source_warehouse_id} onChange={e => setForm({...form, source_warehouse_id: e.target.value})}>
+                    <option value="">Select...</option>
+                    {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group"><label>Destination Warehouse</label>
+                  <select required value={form.dest_warehouse_id} onChange={e => setForm({...form, dest_warehouse_id: e.target.value})}>
+                    <option value="">Select...</option>
+                    {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                  </select>
+                </div>
               </div>
-              <div className="form-group"><label>Destination Warehouse</label>
-                <select required value={form.dest_warehouse_id} onChange={e => setForm({...form, dest_warehouse_id: e.target.value})}>
-                  <option value="">Select...</option>
-                  {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </select>
-              </div>
-              <div className="form-group"><label>Notes</label><textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} /></div>
-              <h4 style={{ marginBottom: 8 }}>Items</h4>
+              <div className="form-group"><label>Notes</label><textarea placeholder="Optional notes..." value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} /></div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: 8, display: 'block' }}>Line Items</label>
               {form.items.map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                  <select required value={item.product_id} onChange={e => updateLine(i, 'product_id', e.target.value)} style={{ flex: '1 1 100%' }}>
+                <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <select required value={item.product_id} onChange={e => updateLine(i, 'product_id', e.target.value)} style={{ flex: '1 1 100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13 }}>
                     <option value="">Product</option>
                     {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
-                  <select required value={item.source_location_id} onChange={e => updateLine(i, 'source_location_id', e.target.value)} style={{ flex: 1 }}>
-                    <option value="">From Location</option>
+                  <select required value={item.source_location_id} onChange={e => updateLine(i, 'source_location_id', e.target.value)} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13 }}>
+                    <option value="">From</option>
                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
-                  <select required value={item.dest_location_id} onChange={e => updateLine(i, 'dest_location_id', e.target.value)} style={{ flex: 1 }}>
-                    <option value="">To Location</option>
+                  <select required value={item.dest_location_id} onChange={e => updateLine(i, 'dest_location_id', e.target.value)} style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13 }}>
+                    <option value="">To</option>
                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
-                  <input required type="number" placeholder="Qty" value={item.quantity} onChange={e => updateLine(i, 'quantity', e.target.value)} style={{ width: 70 }} />
+                  <input required type="number" placeholder="Qty" value={item.quantity} onChange={e => updateLine(i, 'quantity', e.target.value)} style={{ width: 70, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13 }} />
+                  {form.items.length > 1 && <button type="button" onClick={() => removeLine(i)} className="btn btn-danger btn-sm" style={{ padding: '6px 8px' }}>✕</button>}
                 </div>
               ))}
-              <button type="button" className="btn btn-sm" onClick={addLine} style={{ marginBottom: 14 }}>+ Add Line</button>
-              <div className="actions"><button className="btn btn-primary" type="submit">Create</button><button className="btn" type="button" onClick={() => setShow(false)}>Cancel</button></div>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={addLine} style={{ marginBottom: 16 }}>+ Add Line</button>
+              <div className="actions" style={{ marginTop: 8 }}>
+                <button className="btn btn-primary" type="submit">Create Transfer</button>
+                <button className="btn btn-ghost" type="button" onClick={() => setShow(false)}>Cancel</button>
+              </div>
             </form>
           </div>
         </div>

@@ -17,10 +17,12 @@ export default function Login() {
       if (isRegister) {
         await api.post('/auth/register', { email, password, full_name: fullName })
         setIsRegister(false)
-        setError('')
+        alert('Registration successful! Please login.')
       } else {
         const res = await api.post('/auth/login', { email, password })
         localStorage.setItem('token', res.data.access_token)
+        const me = await api.get('/auth/me')
+        localStorage.setItem('user', JSON.stringify(me.data))
         navigate('/')
       }
     } catch (err) {
@@ -31,31 +33,33 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-box">
-        <h2>{isRegister ? 'Register' : 'Login'}</h2>
+        <div className="login-logo"><span>CoreINV</span></div>
+        <h2>{isRegister ? 'Create Account' : 'Welcome Back'}</h2>
+        <p className="login-subtitle">{isRegister ? 'Register to get started' : 'Sign in to your account'}</p>
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
           {isRegister && (
             <div className="form-group">
               <label>Full Name</label>
-              <input value={fullName} onChange={e => setFullName(e.target.value)} required />
+              <input placeholder="John Doe" value={fullName} onChange={e => setFullName(e.target.value)} required />
             </div>
           )}
           <div className="form-group">
             <label>Email</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input type="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
-          <button className="btn btn-primary" style={{ width: '100%' }} type="submit">
-            {isRegister ? 'Register' : 'Login'}
+          <button className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '14px', marginTop: '4px' }} type="submit">
+            {isRegister ? 'Create Account' : 'Sign In'}
           </button>
         </form>
-        <p style={{ textAlign: 'center', marginTop: 14, fontSize: 13 }}>
+        <p style={{ textAlign: 'center', marginTop: 18, fontSize: 13, color: 'var(--text-muted)' }}>
           {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <a onClick={() => setIsRegister(!isRegister)} style={{ color: '#3b82f6', cursor: 'pointer' }}>
-            {isRegister ? 'Login' : 'Register'}
+          <a onClick={() => { setIsRegister(!isRegister); setError('') }} style={{ color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>
+            {isRegister ? 'Sign In' : 'Register'}
           </a>
         </p>
       </div>
