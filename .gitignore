@@ -1,74 +1,113 @@
-# ----------------------
+# ===============================
 # Python
-# ----------------------
-__pycache__/
+# ===============================
+**pycache**/
 *.py[cod]
 *$py.class
 *.so
-*.egg-info/
-*.egg
-build/
-dist/
 
-# Python cache / testing
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Python caches
 .pytest_cache/
 .mypy_cache/
+.cache/
 .coverage
+.coverage.*
 htmlcov/
 
-# ----------------------
-# Virtual environments
-# ----------------------
+# ===============================
+# Virtual Environments
+# ===============================
 venv/
 .venv/
 env/
+ENV/
 
-# ----------------------
-# Environment variables
-# ----------------------
+# ===============================
+# Environment Variables
+# ===============================
 .env
 .env.*
+backend/.env
 
-# ----------------------
+# ===============================
 # Logs
-# ----------------------
+# ===============================
 *.log
-
-# ----------------------
-# IDE / Editor
-# ----------------------
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# ----------------------
-# OS files
-# ----------------------
-.DS_Store
-Thumbs.db
-
-# ----------------------
-# Alembic
-# ----------------------
-migrations/versions/__pycache__/
-
-# ----------------------
-# Node / Frontend
-# ----------------------
-node_modules/
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build artifacts
-.next/
-out/
-dist/
-build/
-
-# ----------------------
-# Misc
-# ----------------------
+# ===============================
+# SQLite / Local Databases
+# ===============================
 *.sqlite3
 *.db
+*.db-journal
+
+# ===============================
+# IDE / Editors
+# ===============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ===============================
+# OS Files
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Alembic
+# ===============================
+migrations/versions/**pycache**/
+
+# ===============================
+# Node / Frontend
+# ===============================
+node_modules/
+frontend/node_modules/
+new_frontend/node_modules/
+
+# Vite cache
+.vite/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+coverage/
+
+# ===============================
+# React / Vite / Typescript
+# ===============================
+*.tsbuildinfo
+
+# ===============================
+# Misc
+# ===============================
+*.bak
+*.tmp
+*.temp

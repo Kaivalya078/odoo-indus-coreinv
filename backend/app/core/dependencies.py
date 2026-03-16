@@ -4,6 +4,7 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 from app.database.session import SessionLocal
 from app.core.security import decode_access_token
+from uuid import UUID
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -25,7 +26,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     try:
         payload = decode_access_token(token)
-        user_id: str = payload.get("sub")
+        user_id = UUID(payload.get("sub"))
         if user_id is None:
             raise credentials_exception
     except JWTError:
